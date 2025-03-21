@@ -90,9 +90,9 @@
         let cart = [];
 
         function updateCartProgress(cartValue) {
-            const threshould = 1000;  // threshold 
+            const threshold = 1000;  // threshold 
             const remaining = threshold - cartValue;
-            const progressPercentage = Math.min((cartValue / threshould) * 100, 100);
+            const progressPercentage = Math.min((cartValue / threshold) * 100, 100);
 
             progressBar.style.width = `${progressPercentage}%`;
 
