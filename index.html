@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-8">
+        <h1 class="text-2xl font-bold mb-8 text-center">Shopping Cart</h1>
+
+        <!-- Laptop -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white rounded-lg shadow-md p-4">
+                <h2 class="text-lg font-semibold mb-2">Laptop</h2>
+                <p class="text-gray-600 mb-4">₹500</p>
+                <button class="add-to-cart bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                        data-product-name="Laptop" data-product-price="500">
+                    Add to Cart
+                </button>
+            </div>
+
+            <!-- SmartPhne -->
+            <div class="bg-white rounded-lg shadow-md p-4">
+                <h2 class="text-lg font-semibold mb-2">Smartphone</h2>
+                <p class="text-gray-600 mb-4">₹300</p>
+                <button class="add-to-cart bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                        data-product-name="Smartphone" data-product-price="300">
+                    Add to Cart
+                </button>
+            </div>
+
+            <!-- Headphone -->
+            <div class="bg-white rounded-lg shadow-md p-4">
+                <h2 class="text-lg font-semibold mb-2">Headphones</h2>
+                <p class="text-gray-600 mb-4">₹100</p>
+                <button class="add-to-cart bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                        data-product-name="Headphones" data-product-price="100">
+                    Add to Cart
+                </button>
+            </div>
+
+            <!-- Smartwatch -->
+            <div class="bg-white rounded-lg shadow-md p-4">
+                <h2 class="text-lg font-semibold mb-2">Smartwatch</h2>
+                <p class="text-gray-600 mb-4">₹150</p>
+                <button class="add-to-cart bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                        data-product-name="Smartwatch" data-product-price="150">
+                    Add to Cart
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-4 mb-8">
+            <h2 class="text-xl font-semibold mb-4">Cart Progress</h2>
+            <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+                <div id="progressBar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+            </div>
+            <div id="freeGiftMessage" class="bg-blue-100 p-4 rounded-md text-center text-blue-700"></div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-4 mb-8">
+            <h2 class="text-xl font-semibold mb-4">Cart Summary</h2>
+            <div class="flex justify-between items-center mb-4">
+                <span class="font-semibold">Subtotal:</span>
+                <span id="subtotal">₹0</span>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-4 mb-8">
+            <h2 class="text-xl font-semibold mb-4">Cart Items</h2>
+            <div id="cart-items"></div>
+        </div>
+
+        <div id="empty-cart-message" class="bg-white rounded-lg shadow-md p-4 text-center hidden">
+            <p class="text-gray-600">Your cart is empty</p>
+            <p class="text-sm text-gray-400">Add some products to your cart here!</p>
+        </div>
+    </div>
+
+    <script>
+        const addToCartButtons = document.querySelectorAll('.add-to-cart');
+        const subtotalElement = document.getElementById('subtotal');
+        const freeGiftMessage = document.getElementById('freeGiftMessage');
+        const cartItemsContainer = document.getElementById('cart-items');
+        const emptyCartMessage = document.getElementById('empty-cart-message');
+        const progressBar = document.getElementById('progressBar');
+
+        let cart = [];
+
+        function updateCartProgress(cartValue) {
+            const threshould = 1000;  // threshold 
+            const remaining = threshold - cartValue;
+            const progressPercentage = Math.min((cartValue / threshould) * 100, 100);
+
+            progressBar.style.width = `${progressPercentage}%`;
+
+            if (remaining > 0) {
+                freeGiftMessage.innerText = `Add ₹${remaining} more to get a FREE Wireless Mouse!`; //if remaining is  to show
+            } else {
+                freeGiftMessage.innerText = "Congratulations! You're eligible for a FREE Wireless Mouse!";
+            }
+        }
+
+        function updateCartDisplay() {
+            cartItemsContainer.innerHTML = '';
+            let subtotal = 0;
+
+            if (cart.length === 0) {
+                emptyCartMessage.classList.remove('hidden');
+                cartItemsContainer.classList.add('hidden');
+            } else {
+                emptyCartMessage.classList.add('hidden');
+                cartItemsContainer.classList.remove('hidden');
+            }
+
+            cart.sort((a, b) => a.name.localeCompare(b.name)); //sorting String order
+
+            cart.forEach((item, index) => {
+                    //createElement~adding a div
+                const cartItemDiv = document.createElement('div');
+                cartItemDiv.classList.add('grid', 'grid-cols-3', 'gap-2', 'py-2', 'border-b', 'border-gray-200', 'items-center');
+
+                const itemInfoDiv = document.createElement('div');
+                itemInfoDiv.classList.add('col-span-2', 'flex', 'flex-col');
+
+                //Item name is element eg:Laptop
+                const itemName = document.createElement('span');
+
+                itemName.classList.add('font-semibold');//tailwind
+                itemName.textContent = item.name;
+
+                const itemPrice = document.createElement('span');
+                const totalItemPrice = item.price * item.quantity;
+                itemPrice.textContent = item.price === 0 ? // if -else ternery method to check quantity rate 0 orr not
+                    `₹0 × ${item.quantity} = ₹0 (FREE GIFT)` : 
+                    `₹${item.price} × ${item.quantity} = ₹${totalItemPrice}`;
+
+                itemInfoDiv.appendChild(itemName);
+                itemInfoDiv.appendChild(itemPrice);
+
+                //create  a div itemControls
+                const itemControls = document.createElement('div');  
+                itemControls.classList.add('flex', 'items-center', 'justify-end', 'space-x-2'); //add tailwind class
+
+                //Substract key 
+
+                const minusButton = document.createElement('button');
+                minusButton.textContent = '-';
+                minusButton.classList.add('bg-red-500', 'text-white', 'w-6', 'h-6', 'rounded', 'hover:bg-red-600');
+                minusButton.addEventListener('click', () => decreaseQuantity(index));
+
+             
+
+                const quantitySpan = document.createElement('span');
+                quantitySpan.textContent = item.quantity;
+
+                //Adding Key
+                const plusButton = document.createElement('button');
+                plusButton.textContent = '+';
+                plusButton.classList.add('bg-green-500', 'text-white', 'w-6', 'h-6', 'rounded', 'hover:bg-green-600');
+                plusButton.addEventListener('click', () => increaseQuantity(index));
+
+                if (item.price !== 0) {
+                    itemControls.appendChild(minusButton);//shows this in not 0
+                    itemControls.appendChild(quantitySpan);
+                    itemControls.appendChild(plusButton);
+                } else {
+                    itemControls.appendChild(quantitySpan);// show quantity in 0
+                }
+
+                cartItemDiv.appendChild(itemInfoDiv);// adding itemInfoDiv(DOM)
+                cartItemDiv.appendChild(itemControls);
+                cartItemsContainer.appendChild(cartItemDiv);
+
+                if (item.price !== 0) {
+                    subtotal += totalItemPrice;
+                }
+            });
+
+            subtotalElement.textContent = `₹${subtotal}`;
+            updateCartProgress(subtotal);
+
+            if (subtotal >= 1000) {
+                const freeGiftExists = cart.some(item => item.name === "Wireless Mouse (Free)");
+                if (!freeGiftExists) {
+                    cart.push({ name: "Wireless Mouse (Free)", price: 0, quantity: 1 });
+                    updateCartDisplay();
+                }
+            } else {
+                const freeGiftIndex = cart.findIndex(item => item.name === "Wireless Mouse (Free)");
+                if (freeGiftIndex !== -1) { //freeGiftIndex is  position of the free gift to fetch.
+                    cart.splice(freeGiftIndex, 1);
+                    updateCartDisplay();
+                }
+            }
+        }
+
+        function increaseQuantity(index) {
+            cart[index].quantity += 1;
+            updateCartDisplay();
+        }
+
+        function decreaseQuantity(index) {
+            if (cart[index].quantity > 1) {
+                cart[index].quantity -= 1;
+            } else {
+                cart.splice(index, 1);
+            }
+            updateCartDisplay();
+        }
+
+        //In this items is adding in cart
+        addToCartButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const productName = this.dataset.productName;//grabs product name
+                const productPrice = parseInt(this.dataset.productPrice);//and price
+
+                const existingItem = cart.find(item => item.name === productName);
+                //cart in array of object
+                //and fetch other deetails
+                if (existingItem && existingItem.price !== 0) {
+                    existingItem.quantity += 1;// increase quantity
+                } else if (!existingItem) {
+                    //ading whole data there
+                    cart.push({ name: productName, price: productPrice, quantity: 1 });
+                }
+                updateCartDisplay();
+            });
+        });
+
+        updateCartDisplay();
+    </script>
+</body>
+</html>
